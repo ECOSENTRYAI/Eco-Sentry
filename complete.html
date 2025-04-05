@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wildfire & Environmental Change Detection</title>
+  <style>
+    /* General Styles */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Header Styles */
+    header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    padding: 5px 20px; /* Reduced from 10px 20px (top/bottom padding decreased) */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8f9f8;
+    z-index: 10;
+    transition: background-color 0.3s ease;
+    height: 60px; /* Optional: Set fixed height if needed */
+}
+
+
+    header:hover {
+      background-color: #e0e0e0;
+    }
+
+    .logo img {
+    height: 90px; /* Increased from 60px (adjust as needed) */
+    width: auto; /* Maintain aspect ratio */
+    transition: transform 0.3s ease;
+}
+
+    .logo img:hover {
+      transform: scale(1.1);
+    }
+
+    .nav-links {
+    display: flex;
+    gap: 50px;
+    margin-left: auto;
+    margin-right: 30px;
+}
+
+    .nav-links a {
+      color: rgb(6, 52, 16);
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #007bff;
+      transform: translateY(-2px);
+    }
+
+    /* Section Styles */
+    section {
+      width: 100vw;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Page 1: Hover to Play Video */
+    .left-text-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      z-index: 10;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .left-text-container h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .left-text-container p {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 1rem;
+      color: white;
+      background-color: #007bff;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #000000;
+      transform: scale(1.05);
+    }
+
+    /* Video Containers for Page 1 */
+    .container-section {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 33.33vw;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 0.5s ease;
+      position: relative;
+    }
+
+    #container1 { background-image: url('./ICE 3.jpg'); background-color: #d0eaff; }
+    #container2 { background-image: url('./FIRE.jpg'); background-color: #ffcccb; }
+    #container3 { background-image: url('./deforest.jpg'); background-color: #c0d890; }
+
+    /* Page 1 Videos */
+    .page1-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      z-index: -1;
+    }
+
+    /* Page 2: Video Player Section with Background Video */
+    section#page2 {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: relative;
+      padding: 100px 5% 20px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    /* Background Video - Only for Page 2 */
+    #page2-bg-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    /* Video Overlay */
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 0;
+    }
+
+    /* Content Container with Animation */
+    .page2-content-container {
+      width: 50%;
+      z-index: 2;
+      padding-right: 40px;
+      transform: translateX(-100px);
+      opacity: 0;
+      animation: slideIn 0.8s ease-out 0.4s forwards;
+    }
+
+    .page2-content-container h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+    }
+
+    .page2-content-container p {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* Video Container with Animation */
+    .page2-video-container {
+      width: 45%;
+      max-width: 600px;
+      height: 400px;
+      z-index: 2;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transform: translateX(100px);
+      opacity: 0;
+      animation: slideIn 0.8s ease-out 0.4s forwards;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page2-video-container:hover {
+      transform: translateX(0) scale(1.02);
+    }
+
+    .page2-video-container video {
+      width: 100%;
+      height: 300px;
+      display: block;
+      position: relative;
+      opacity: 1;
+      object-fit: cover;
+    }
+
+    /* Video Controls Styling */
+    .video-controls {
+      display: flex;
+      justify-content: center;
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+      flex-shrink: 0;
+    }
+
+    .video-controls button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      margin: 0 15px;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .video-controls button:hover {
+      color: #007bff;
+    }
+
+    /* Video Selector Buttons */
+    .video-selector {
+      display: flex;
+      justify-content: center;
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .video-selector button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      margin: 0 5px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .video-selector button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .video-selector button.active {
+      background: #007bff;
+      font-weight: bold;
+    }
+
+    /* Background Video Controls */
+    .bg-video-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      gap: 15px;
+    }
+
+    .bg-video-controls button {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .bg-video-controls button:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Content Section Styles */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+
+    .content-container {
+      position: relative;
+      z-index: 2;
+      width: 80%;
+      max-width: 1200px;
+      padding: 40px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 16px;
+    }
+
+    .text-content {
+      color: rgb(255, 251, 251);
+    }
+
+    .text-content h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .text-content h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    .text-content p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    /* Footer Styles */
+    footer {
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 100px 20px;
+      font-size: 1.5rem;
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(var(--start-pos, 100px));
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      section#page2 {
+        flex-direction: column;
+        padding-top: 120px;
+      }
+      
+      .page2-content-container, 
+      .page2-video-container {
+        width: 90%;
+        max-width: none;
+      }
+      
+      .page2-content-container {
+        margin-bottom: 40px;
+        padding-right: 0;
+        transform: translateY(50px);
+        animation: slideUp 0.8s ease-out 0.4s forwards;
+      }
+      
+      .page2-content-container h1 {
+        font-size: 2rem;
+      }
+      
+      .page2-content-container p {
+        font-size: 1.1rem;
+      }
+      
+      .page2-video-container {
+        height: auto;
+        max-height: 400px;
+        transform: translateY(50px);
+        animation: slideUp 0.8s ease-out 0.4s forwards;
+      }
+      
+      .page2-video-container video {
+        height: 250px;
+      }
+
+      .content-container {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .text-content h1 {
+        font-size: 2rem;
+      }
+
+      .text-content h2 {
+        font-size: 1.5rem;
+      }
+
+      .text-content p {
+        font-size: 1rem;
+      }
+
+      .bg-video-controls {
+        bottom: 10px;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Page 1: Hover to Play Video -->
+  <section>
+    <header>
+      <div class="logo">
+        <img src="1234.png" alt="Logo" />
+      </div>
+      <nav class="nav-links">
+        <a href="#page2">About</a>
+        <a href="#page3">Wildfire</a>
+        <a href="#page4">Deforestation</a>
+        <a href="#page5">Ice Melting</a>
+        <a href="#page6" style="margin-right: 50px;">History</a>
+      </nav>
+    </header>
+    
+    <!-- Centered Text Content -->
+    <div class="left-text-container">
+      <h1>Wildfire & Environmental Change Prediction</h1>
+      <p>Monitor wildfire spots, deforestation, and ice melting in real-time.</p>
+      <a href="wild_fire2.html" class="btn">Let's Track</a>
+    </div>
+  
+    <!-- Image Containers and Videos -->
+    <div id="container1" class="container" onmouseover="playVideo('video1')" onmouseout="resetImages()"></div>
+    <video id="video1" class="page1-video" src="./last ice.mp4" muted loop playsinline></video>
+  
+    <div id="container2" class="container" onmouseover="playVideo('video2')" onmouseout="resetImages()"></div>
+    <video id="video2" class="page1-video" src="last fire.mp4" muted loop playsinline></video>
+  
+    <div id="container3" class="container" onmouseover="playVideo('video3')" onmouseout="resetImages()"></div>
+    <video id="video3" class="page1-video" src="./last deforestation.mp4" muted loop playsinline></video>
+  </section>
+
+  <!-- Page 2: About Section with Separate Background Video -->
+  <section id="page2">
+    <!-- Separate Background Video for Page 2 -->
+    <video id="page2-bg-video" autoplay muted loop playsinline>
+      <source src="./page2 new vedio.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    
+    <!-- Video Overlay -->
+    <div class="video-overlay"></div>
+    
+    <!-- Background Video Controls -->
+    <div class="bg-video-controls">
+      <button onclick="toggleBgVideoPlay()" id="bg-play-btn">Pause</button>
+      <button onclick="toggleBgVideoMute()" id="bg-mute-btn">Unmute</button>
+    </div>
+    
+    <!-- Animated Text Content -->
+    <div class="page2-content-container">
+      <h1 class="highlight">Project Aim: Wildfire & Environmental Change Detection</h1>
+      <p>Our project monitors and detects environmental changes such as wildfires, deforestation, and ice melting in <strong>real-time</strong> using <strong>satellite imagery</strong> and <strong>AI-based analytics</strong>.</p>
+      <p>We integrate <strong>machine learning models</strong> trained on vast environmental datasets to recognize abnormal patterns and provide <strong>early alerts</strong>.</p>
+      <p>By using <strong>automated satellite image analysis</strong>, we aim to <strong>reduce human errors</strong> and <strong>increase disaster prediction accuracy</strong>.</p>
+      <p>Select a video to see examples of the environmental changes we monitor:</p>
+    </div>
+    
+    <!-- Animated Video Player -->
+    <div class="page2-video-container">
+      <video id="main-video" poster="" controls>
+        <source src="fire content2.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      
+      <div class="video-controls">
+        <button onclick="playPause('main-video', 'main-play')" id="main-play">❚❚</button>
+        <button onclick="restartVideo('main-video')">↻</button>
+        <button onclick="toggleMute('main-video', 'main-mute')" id="main-mute">🔊</button>
+      </div>
+      
+      <div class="video-selector">
+        <button class="active" onclick="changeVideo('wildfire')">Wildfire</button>
+        <button onclick="changeVideo('deforestation')">Deforestation</button>
+        <button onclick="changeVideo('ice')">Ice Melting</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 3: Wildfire Section -->
+  <section id="page3" style="background-image: url('page 3 .jpg');">
+    <div class="overlay"></div>
+    <div class="content-container">
+      <div class="text-content">
+        <h1>Wildfires Around the World</h1>
+        <p>Understanding the causes, impacts, and prevention of wildfires globally.</p>
+        <h2>Introduction to Wildfires</h2>
+        <p>Wildfires are uncontrolled fires that spread rapidly in vegetation areas. They pose significant threats to lives, properties, and ecosystems. Factors like extreme heat, drought, and human negligence often contribute to the ignition and spread of these fires.</p>
+        <p>Through accurate predictions and real-time insights, we aim to protect nature and prevent ecological damage.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 4: Deforestation Section -->
+  <section id="page4" style="background-image: url('page 4.jpg');">
+    <div class="overlay"></div>
+    <div class="content-container">
+      <div class="text-content">
+        <h1>Global Deforestation Crisis</h1>
+        <p>Tracking and analyzing deforestation patterns worldwide.</p>
+        <h2>Understanding Deforestation</h2>
+        <p>Deforestation refers to the large-scale removal of forests, primarily due to human activities like agriculture, logging, and urban expansion. This environmental issue leads to biodiversity loss, climate change, and disruption of water cycles.</p>
+        <p>Our monitoring system helps track deforestation in real-time, enabling better conservation efforts.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 5: Ice Melting Section -->
+  <section id="page5" style="background-image: url('page 5.jpg');">
+    <div class="overlay"></div>
+    <div class="content-container">
+      <div class="text-content">
+        <h1>Polar Ice Melting</h1>
+        <p>Monitoring the alarming rate of ice melting in polar regions.</p>
+        <h2>The Ice Melting Phenomenon</h2>
+        <p>Global warming has accelerated the melting of glaciers and polar ice caps at unprecedented rates. This leads to rising sea levels, habitat loss for Arctic species, and disruption of global climate patterns.</p>
+        <p>Our technology provides precise measurements of ice retreat, helping scientists understand and predict future changes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Page 6: History Section -->
+<!-- Page 6: History Section -->
+<section id="page6" style="background-image:url('WhatsApp\ Image\ 2025-04-04\ at\ 15.26.54_99ffa7cb.jpg');">
+  <div class="overlay"></div>
+  <div class="content-container" style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="text-content" style="width: 60%; padding-right: 20px;">
+      <h1>Wildfire History & Statistics</h1>
+      <p>Understanding the historical patterns and impacts of wildfires globally.</p>
+      <h2>Historical Wildfire Data</h2>
+      <p>Wildfires have been a natural part of many ecosystems for millions of years. However, recent decades have seen an increase in frequency and intensity due to climate change and human activities.</p>
+      <p>Our analysis of historical wildfire data helps identify trends and patterns that can improve future predictions and prevention strategies.</p>
+      <p>Key findings from our research:</p>
+      <ul>
+        <li>Wildfire frequency has increased by 25% since 2000</li>
+        <li>Average fire season length has extended by 20 days</li>
+        <li>The area burned annually has doubled since 1980</li>
+      </ul>
+    </div>
+    <div style="width: 35%;">
+      <img src="1911-_Wildfire_disasters_-_worldwide.svg.png" alt="Wildfire Statistics" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+    </div>
+  </div>
+</section>
+</section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Environmental Monitoring Project. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // JavaScript for Page 1: Hover to Play Video
+    function playVideo(videoId) {
+      const video = document.getElementById(videoId);
+      video.style.opacity = '1';
+      video.play();
+      document.getElementById('container1').style.opacity = '0';
+      document.getElementById('container2').style.opacity = '0';
+      document.getElementById('container3').style.opacity = '0';
+    }
+
+    function resetImages() {
+      document.getElementById('video1').style.opacity = '0';
+      document.getElementById('video2').style.opacity = '0';
+      document.getElementById('video3').style.opacity = '0';
+      document.getElementById('container1').style.opacity = '1';
+      document.getElementById('container2').style.opacity = '1';
+      document.getElementById('container3').style.opacity = '1';
+    }
+
+    const leftTextContainer = document.querySelector('.left-text-container');
+    const page1Videos = document.querySelectorAll('.page1-video');
+
+    leftTextContainer.addEventListener('mouseenter', () => {
+      page1Videos.forEach(video => {
+        video.pause();
+      });
+    });
+
+    leftTextContainer.addEventListener('mouseleave', () => {
+      page1Videos.forEach(video => {
+        video.play();
+      });
+    });
+
+    window.addEventListener('load', () => {
+      page1Videos.forEach(video => {
+        video.pause();
+      });
+    });
+
+    // JavaScript for Page 2: Video Player
+    function playPause(videoId, buttonId) {
+      const video = document.getElementById(videoId);
+      const button = document.getElementById(buttonId);
+      
+      if (video.paused) {
+        video.play();
+        button.textContent = '❚❚';
+      } else {
+        video.pause();
+        button.textContent = '▶';
+      }
+    }
+    
+    function restartVideo(videoId) {
+      const video = document.getElementById(videoId);
+      video.currentTime = 0;
+      video.play();
+      document.getElementById('main-play').textContent = '❚❚';
+    }
+    
+    function toggleMute(videoId, buttonId) {
+      const video = document.getElementById(videoId);
+      const button = document.getElementById(buttonId);
+      
+      if (video.muted) {
+        video.muted = false;
+        button.textContent = '🔊';
+      } else {
+        video.muted = true;
+        button.textContent = '🔇';
+      }
+    }
+    
+    function changeVideo(type) {
+      const video = document.getElementById('main-video');
+      const selectorButtons = document.querySelectorAll('.video-selector button');
+      
+      selectorButtons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      switch(type) {
+        case 'wildfire':
+          video.poster = './FIRE.jpg';
+          video.src = './fire final 2.mp4';
+          break;
+        case 'deforestation':
+          video.poster = './deforest.jpg';
+          video.src = './final deforestation 2.mp4';
+          break;
+        case 'ice':
+          video.poster = './ICE 3.jpg';
+          video.src = './final ice 2.mp4';
+          break;
+      }
+      
+      document.getElementById('main-play').textContent = '▶';
+      video.load();
+    }
+    
+    document.getElementById('main-video').addEventListener('play', () => {
+      document.getElementById('main-play').textContent = '❚❚';
+    });
+    
+    document.getElementById('main-video').addEventListener('pause', () => {
+      document.getElementById('main-play').textContent = '▶';
+    });
+    
+    document.getElementById('main-video').addEventListener('ended', () => {
+      document.getElementById('main-play').textContent = '▶';
+    });
+
+    // JavaScript for Page 2 Background Video Controls
+    const page2BgVideo = document.getElementById('page2-bg-video');
+    const bgPlayBtn = document.getElementById('bg-play-btn');
+    const bgMuteBtn = document.getElementById('bg-mute-btn');
+
+    // Initialize background video
+    function initBgVideo() {
+      page2BgVideo.play();
+      page2BgVideo.loop = true;
+      page2BgVideo.muted = true;
+    }
+
+    // Toggle play/pause for background video
+    function toggleBgVideoPlay() {
+      if (page2BgVideo.paused) {
+        page2BgVideo.play();
+        bgPlayBtn.textContent = 'Pause';
+      } else {
+        page2BgVideo.pause();
+        bgPlayBtn.textContent = 'Play';
+      }
+    }
+
+    // Toggle mute/unmute for background video
+    function toggleBgVideoMute() {
+      if (page2BgVideo.muted) {
+        page2BgVideo.muted = false;
+        bgMuteBtn.textContent = 'Mute';
+      } else {
+        page2BgVideo.muted = true;
+        bgMuteBtn.textContent = 'Unmute';
+      }
+    }
+
+    // Initialize when page loads
+    window.addEventListener('load', () => {
+      initBgVideo();
+    });
+
+    // Animation triggers
+    document.addEventListener('DOMContentLoaded', function() {
+      const page2 = document.querySelector('#page2');
+      if (page2) {
+        // Force reflow to enable animations
+        void page2.offsetWidth;
+      }
+    });
+  </script>
+</body>
+</html>

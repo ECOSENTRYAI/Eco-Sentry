@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSentry.ai</title>
+
+    <!-- Tailwind & Bootstrap -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHJiYr_8OKBEnxVGhH57lCwnJLzjDeGD4"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; overflow-x: hidden; }
+
+        /* Background Styles */
+        .background {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .background video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Alert Button */
+        .alert-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .alert-btn:hover {
+            background-color: darkred;
+            transform: scale(1.05);
+        }
+
+        /* Logo */
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+
+        /* Search Container */
+        .search-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            z-index: 10;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 12px 50px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            font-size: 18px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+        }
+        .search-container .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgb(237, 2, 2);
+            font-size: 18px;
+            z-index: 10;
+        }
+        .search-container .earth-icon { left: 15px; }
+        .search-container .mic-icon { right: 50px; }
+        .search-container .camera-icon { right: 15px; }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background-color: rgba(20, 20, 20, 0.95);
+            color: white;
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.65, 0.05, 0.36, 1);
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+        .sidebar.active { right: 0; }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .close-btn:hover { transform: rotate(90deg); color: red; }
+
+        /* Alert Items */
+        .alert-item {
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: rgba(30, 30, 30, 0.8);
+            border-left: 4px solid red;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        .alert-item:hover {
+            transform: translateX(0) scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.2);
+        }
+
+        /* Prediction Container */
+        .prediction-container {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+            z-index: 10;
+            display: none;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+        #predictionMap {
+            height: 300px;
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+        .risk-display {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .close-prediction {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .close-prediction:hover {
+            color: #ff4444;
+            transform: scale(1.2);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <video autoplay loop muted preload="auto">
+            <source src="1851190-uhd_3840_2160_25fps.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+
+        <button class="alert-btn" id="alertBtn">
+            <i class="bi bi-exclamation-triangle-fill"></i> Alerts
+        </button>
+
+        <div class="logo">
+            <img src="Logo maker project last.png" alt="Ecosentry.ai" style="height: 100px; width: auto;">
+        </div>
+
+        <div class="search-container">
+            <i class="bi bi-globe-americas icon earth-icon"></i>
+            <input type="text" id="locationInput" placeholder="Search location...">
+            <i class="bi bi-mic icon mic-icon"></i>
+            <i class="bi bi-camera icon camera-icon"></i>
+        </div>
+
+        <div class="prediction-container" id="predictionContainer">
+            <div class="close-prediction" id="closePrediction">×</div>
+            <div class="risk-display" id="riskPercentage"></div>
+            <div id="predictionMap"></div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    Environmental Alerts
+                </div>
+                <button class="close-btn" id="closeBtn">&times;</button>
+            </div>
+
+            <!-- Alert Items -->
+            <div class="alert-item">
+                <h3><i class="bi bi-fire"></i> Forest Fire Detected</h3>
+                <p>Amid prolonged dry weather and minimal snowfall, massive forest fires have erupted at multiple locations across Kashmir, severely impacting the region's green cover.</p>
+                <div class="alert-time"><i class="bi bi-clock"></i> 17 hours ago</div>
+            </div>
+
+            <div class="alert-item">
+                <h3><i class="bi bi-tree"></i> Forest Fire Alert</h3>
+                <p>Emergency crews responding to wildfires in southern region. Residents advised to evacuate immediately.</p>
+                <div class="alert-time"><i class="bi bi-clock"></i> 2 hours ago</div>
+            </div>
+
+            <div class="alert-item">
+                <h3><i class="bi bi-droplet"></i> Drought Warning</h3>
+                <p>Severe drought conditions reported in northern territories. Water restrictions now in effect.</p>
+                <div class="alert-time"><i class="bi bi-clock"></i> 1 day ago</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let marker;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const video = document.querySelector("video");
+            const alertBtn = document.getElementById("alertBtn");
+            const sidebar = document.getElementById("sidebar");
+            const closeBtn = document.getElementById("closeBtn");
+            const locationInput = document.getElementById("locationInput");
+            const predictionContainer = document.getElementById("predictionContainer");
+            const closePrediction = document.getElementById("closePrediction");
+
+            // Video loop handling
+            video.addEventListener("ended", function () {
+                video.currentTime = 0;
+                video.play();
+            });
+
+            // Sidebar controls
+            alertBtn.addEventListener("click", function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle("active");
+            });
+
+            closeBtn.addEventListener("click", function() {
+                sidebar.classList.remove("active");
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && event.target !== alertBtn) {
+                    sidebar.classList.remove("active");
+                }
+            });
+
+            // Prediction functionality
+            async function handlePrediction(location) {
+                try {
+                    const response = await fetch('https://wildfire-backend-623265456897.us-central1.run.app', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ location: location })
+                    });
+
+                    const data = await response.json();
+
+                    // Clear previous prediction
+                    if(marker) marker.setMap(null);
+
+                    // Update risk display
+                    let riskColor;
+                    if(data.risk > 70) riskColor = "#FF4136";
+                    else if(data.risk > 30) riskColor = "#FFA500";
+                    else riskColor = "#2ECC40";
+
+                    document.getElementById('riskPercentage').innerHTML =
+                        `Wildfire Risk: <span style="color:${riskColor}">${data.risk}%</span>`;
+
+                    // Initialize/update map
+                    const mapOptions = {
+                        center: { lat: data.coordinates.lat, lng: data.coordinates.lon },
+                        zoom: 12,
+                        styles: [
+                            { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+                            { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+                            { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] }
+                        ]
+                    };
+
+                    if(!map) {
+                        map = new google.maps.Map(document.getElementById("predictionMap"), mapOptions);
+                    } else {
+                        map.setCenter(mapOptions.center);
+                        map.setZoom(mapOptions.zoom);
+                    }
+
+                    // Add marker
+                    marker = new google.maps.Marker({
+                        position: mapOptions.center,
+                        map: map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            fillColor: riskColor,
+                            fillOpacity: 0.6,
+                            strokeWeight: 0,
+                            scale: 10
+                        }
+                    });
+
+                    // Show prediction container
+                    predictionContainer.style.display = 'block';
+
+                } catch(error) {
+                    console.error('Prediction error:', error);
+                    alert('Error getting prediction. Please try again.');
+                }
+            }
+
+            // Event listeners
+            locationInput.addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') {
+                    const location = locationInput.value.trim();
+                    if(location) handlePrediction(location);
+                }
+            });
+
+            closePrediction.addEventListener('click', () => {
+                predictionContainer.style.display = 'none';
+                locationInput.value = '';
+                if(marker) marker.setMap(null);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if(e.key === 'Escape') {
+                    predictionContainer.style.display = 'none';
+                    locationInput.value = '';
+                    if(marker) marker.setMap(null);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
