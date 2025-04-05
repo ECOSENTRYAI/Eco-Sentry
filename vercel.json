@@ -1,22 +1,9 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Content-Type", "value": "text/html" }
-      ]
-    }
-  ],
   "rewrites": [
     { "source": "/", "destination": "/complete.html" },
     { "source": "/predict", "destination": "/wild_fire2.html" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "routes": [
-    { "src": "/complete.html", "dest": "/complete.html" },
-    { "src": "/wild_fire2.html", "dest": "/wild_fire2.html" },
-    { "handle": "filesystem" }
   ]
 }
