@@ -1,0 +1,9 @@
+fastapi==0.115.12
+uvicorn==0.34.0
+google-generativeai==0.8.4
+requests==2.32.3
+python-multipart==0.0.20
+joblib==1.4.2
+pandas==2.2.3
+scikit-learn==1.6.1
+earthengine-api==1.5.5

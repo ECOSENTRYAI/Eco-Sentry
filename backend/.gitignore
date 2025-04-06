@@ -1,0 +1,4 @@
+"# Credentials" 
+"*.json" 
+"ee-titasghosh7-*.json" 
+"!requirements.txt" 
