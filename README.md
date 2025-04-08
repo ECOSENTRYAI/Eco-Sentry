@@ -30,7 +30,7 @@ Every year, wildfires cause widespread destruction—impacting lives, biodiversi
 | Cloud Services      | **Google Cloud Platform (GCP)**, **Firebase**     |
 | Automation          | **Google Cloud Functions**                        |
 | AI Assistant        | **Gemini API** (for user interaction, insights)   |
-| DevOps              | Git, GitHub, Docker (optional)                    |
+| DevOps              | Git, GitHub, Docker                               |
 
 ---
 
@@ -46,7 +46,7 @@ Every year, wildfires cause widespread destruction—impacting lives, biodiversi
 ---
 
 
-Watch the [Demo Video ▶️](link-to-demo) to see EcoSentry in action.
+Watch the [Demo Video ▶️](https://youtu.be/dpM1GL6IHyo) to see EcoSentry in action.
 
 ---
 
