@@ -49,6 +49,10 @@ Every year, wildfires cause widespread destruction—impacting lives, biodiversi
 Watch the [Demo Video ▶️](https://youtu.be/dpM1GL6IHyo) to see EcoSentry in action.
 
 ---
+TEAM WORK
+SIDDHANT KAUSHIK- BACKEND
+TITAS GHOSH- AI DEVELOPER
+ATUL BHARDWAJ- FRONTEND
 
 ##  Setup Instructions
 
